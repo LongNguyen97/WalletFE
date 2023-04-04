@@ -91,6 +91,7 @@ export default {
           align: 'center',
           resizable: false,
           menuIcon: true,
+          editable: false,
           // cls: 'ui-state-default',
           sortable: true,
           filter: {type: 'textbox', condition: "begin", listeners: ['keyup']}
