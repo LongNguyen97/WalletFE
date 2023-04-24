@@ -72,6 +72,7 @@ export default {
   },
 
   // Build Configuration: https://go.nuxtjs.dev/config-build
+
   router: {
     middleware: ['auth']
   }, auth: {
@@ -80,15 +81,18 @@ export default {
     },
 
     strategies: {
-
       local: {
-        scheme: 'refresh', token: {
+        scheme: 'refresh',
+        token: {
           property: 'token', maxAge: 60, type: 'JWT'
-        }, refreshToken: {
+        },
+        refreshToken: {
           property: 'token', data: 'token', maxAge: 60 * 60 * 24 * 30
-        }, user: {
+        },
+        user: {
           property: 'user'
-        }, endpoints: {
+        },
+        endpoints: {
           login: {url: '/api-token-auth/', method: 'POST'},
           refresh: {url: '/accounts/token/refresh', method: 'post'},
           user: {url: '/profile/', method: 'get'},
