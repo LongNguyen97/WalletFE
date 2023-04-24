@@ -136,6 +136,17 @@ export default {
             }
           },
           {
+            title: 'Gói đã cấp',
+            width: 40,
+            dataIndx: 'assigned',
+            editable: false,
+            align: "center",
+            render: (ui) => {
+              const amount = `<b style="color: red">${ui.rowData.assigned}</b>`
+              return {text: amount}
+            }
+          },
+          {
             title: 'Đã dùng',
             width: 40,
             dataIndx: 'used',

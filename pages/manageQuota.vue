@@ -1,11 +1,11 @@
 <template>
   <v-app>
-      <div>
-        <v-col
-          cols="6"
-          sm="6"
-          style="display: flex"
-        >
+    <div>
+      <v-col
+        cols="6"
+        sm="6"
+        style="display: flex"
+      >
         <v-autocomplete
           clearable
           deletable-chips
@@ -16,13 +16,18 @@
           :placeholder=placeholder
           v-model="selectedUsername"
         ></v-autocomplete>
-          <v-container>
-            <v-btn @click="getQuotaAndHistoryByUser" :loading=btnApplyLoading>
-              <v-icon style="color: #0066A2"> mdi-account-search</v-icon>
-            </v-btn>
-          </v-container>
-        </v-col>
-      </div>
+        <v-container>
+          <v-btn @click="getQuotaAndHistoryByUser" :loading=btnApplyLoading :disabled=!selectedUsername>
+            <v-icon style="color: #0066A2"> mdi-account-search</v-icon>
+          </v-btn>
+        </v-container>
+      </v-col>
+    </div>
+    <v-checkbox
+      class="inline-checkbox"
+      v-model="isShowingEmpty"
+      label="Hiển thị all"
+    ></v-checkbox>
     <v-row>
       <v-col
         cols="12"
@@ -50,19 +55,21 @@
 
 import userMixin from "~/mixins/user-mixins";
 import CONSTANTS from "@/constants/constants";
+
 export default {
   name: "manageQuota",
-  mixins : [userMixin],
+  mixins: [userMixin],
   data() {
     return {
       users: ['Long', 'Nguyen', 'Viet'],
       notFound: 'User not found',
       placeholder: 'Input user name',
       selectedUsername: '',
-      btnApplyLoading : false,
-      data : {},
-      quotaOptions : {},
-      historyOptions : {},
+      btnApplyLoading: false,
+      data: {},
+      quotaOptions: {},
+      historyOptions: {},
+      isShowingEmpty: false,
       snackbar: {
         snackbar: false,
         text: '',
@@ -74,13 +81,30 @@ export default {
   mounted() {
     this.init();
   },
-// Game	Package	Amount added	Added Time
+  watch: {
+    // whenever question changes, this function will run
+    isShowingEmpty() {
+      this.initQuotaTable()
+    }
+  },
+
   methods: {
     async init() {
       await this.getAllUsers()
       this.users = this.allUsers.map(el => el.username)
     },
     initQuotaTable: function () {
+
+      // set the filtered data to the dataModel
+      var filteredData = null;
+      if (!this.data.quota)
+        return
+      if (this.isShowingEmpty === false) {
+        filteredData = this.data.quota.filter(item => item.amount !== 0 || item.amount_used !== 0);
+      } else {
+        filteredData = this.data.quota
+      }
+
       this.quotaOptions = null;
       this.quotaOptions = {...CONSTANTS.options}
       let currentQuotaOptions = {
@@ -110,9 +134,9 @@ export default {
             editable: true,
             validations: [{type: 'regex', value: '^[0-9]*$', msg: 'Required'}],
             align: "center",
-            render : (ui) => {
+            render: (ui) => {
               let amount = `<b style="color: green"> ${ui.rowData.amount}</b>/<b style="color: red"> ${ui.rowData.amount_used}</b>`
-              return {text : amount }
+              return {text: amount}
             }
           },
           {
@@ -155,16 +179,22 @@ export default {
             editable: false,
             render: (ui) => {
               return {
-                text:`<div style='align-items: center'>
+                text: `<div style='align-items: center'>
                 <span class="mdi mdi-minus-box mdi-24px"></span>
               </button>
               </div>`
               }
             }
           },
-          ],
+        ],
+        sortModel: {
+          single: false,
+          sorter: [{ dataIndx: 'remain_amount', dir: 'down' }],
+          space: true,
+          multiKey: null
+        },
         dataModel: {
-          data: this.data.quota
+          data: filteredData,
         },
         cellClick: this.cellClick(),
       }
@@ -203,7 +233,9 @@ export default {
                 'Admin', 'User'
               ],
             },
-            render: (ui) => {return `<b style="color: ${ui.rowData.amount < 0 ? 'red' : 'green'}">${ui.rowData.amount}</b>`},
+            render: (ui) => {
+              return `<b style="color: ${ui.rowData.amount < 0 ? 'red' : 'green'}">${ui.rowData.amount}</b>`
+            },
             editable: false,
             validations: [{type: 'regex', value: '^[0-9]*$', msg: 'Required'}],
             align: "center",
@@ -254,9 +286,9 @@ export default {
       if ((!ui.rowData.newAmount || isNaN(ui.rowData.newAmount)) || (action === 'assign' && parseInt(ui.rowData.newAmount) <= 0)) return
 
       const data = {
-        game_id: ui.rowData.game_id,
-        identify: ui.rowData.identify,
-        newAmount: action === 'assign' ? parseInt(ui.rowData.newAmount) :(0 - parseInt(ui.rowData.newAmount)),
+        game_id: ui.rowData.game_id || ui.rowData.product_data_game_id,
+        identify: ui.rowData.identify || ui.rowData.product_data_game_identify,
+        newAmount: action === 'assign' ? parseInt(ui.rowData.newAmount) : (0 - parseInt(ui.rowData.newAmount)),
         userId: this.selectedUsername,
       }
       try {
@@ -278,10 +310,8 @@ export default {
 </script>
 
 <style scoped>
-.button-toolbar{
-  border-radius: 5px;
-  margin-right:7px;
-  margin-bottom:3px;
-  border: 1px solid gray;
+.inline-checkbox{
+  margin-right: 20px;
+  margin-top: -16px;
 }
 </style>
