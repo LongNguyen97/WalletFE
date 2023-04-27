@@ -218,7 +218,7 @@ export default {
             {
               title: 'Package Name',
               width: 150,
-              dataIndx: 'name',
+              dataIndx: 'package',
               align: "left",
               editable: false,
               filter: {type: 'textbox', condition: "begin", listeners: ['keyup']}
@@ -240,6 +240,12 @@ export default {
       this.options = {...CONSTANTS.options, ...currentOptions}
     },
     async init() {
+      const today = new Date();
+      const yesterday = new Date(today);
+      yesterday.setDate(today.getDate() - 1);
+      this.fromDate = yesterday.toISOString().substr(0, 10)
+      this.toDate = today.toISOString().substr(0, 10);
+
       await this.getAllUsers()
       await this.getGamesAndPackages()
       this.users = this.allUsers.map(el => el.username)

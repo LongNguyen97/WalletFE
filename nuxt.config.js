@@ -84,7 +84,7 @@ export default {
       local: {
         scheme: 'refresh',
         token: {
-          property: 'token', maxAge: 60, type: 'JWT'
+          property: 'token', maxAge: 3600, type: 'JWT'
         },
         refreshToken: {
           property: 'token', data: 'token', maxAge: 60 * 60 * 24 * 30
@@ -93,8 +93,8 @@ export default {
           property: 'user'
         },
         endpoints: {
-          login: {url: '/api-token-auth/', method: 'POST'},
-          refresh: {url: '/accounts/token/refresh', method: 'post'},
+          login: {url: '/token/', method: 'POST'},
+          refresh: {url: '/token/refresh', method: 'post'},
           user: {url: '/profile/', method: 'get'},
           logout: false
         }
